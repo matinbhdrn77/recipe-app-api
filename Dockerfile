@@ -6,8 +6,14 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
+RUN  apk add --update --no-cache postgresql-client && \
+     apk add --update --no-cache --virtual .tmp-build-deps \
+        build-base postgresql-dev musl-dev
+
 COPY Pipfile Pipfile.lock /app/
 RUN pip install pipenv && pipenv install --system
+
+RUN apk del .tmp-build-deps
 
 COPY . /app/
 
