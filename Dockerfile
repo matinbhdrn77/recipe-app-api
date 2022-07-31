@@ -1,4 +1,4 @@
-FROM python:3.9-alpine3.13
+FROM python:3.10
 LABEL maintainer="matinbhdrn"
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -6,14 +6,12 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-RUN  apk add --update --no-cache postgresql-client && \
-     apk add --update --no-cache --virtual .tmp-build-deps \
-        build-base postgresql-dev musl-dev
+RUN  apt-get update && python3 -m pip install --upgrade pip && apt-get install libpq-dev
 
 COPY Pipfile Pipfile.lock /app/
 RUN pip install pipenv && pipenv install --system
 
-RUN apk del .tmp-build-deps
+RUN apt-get remove -y libpq-dev
 
 COPY . /app/
 
@@ -25,12 +23,6 @@ ARG DEV=false
 #         then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
 #     fi && \
 #     rm -rf /tmp
-RUN adduser \
-        --disabled-password \
-        --no-create-home \
-        django-user
 
 ENV PATH="/py/bin:$PATH"
-
-USER django-user
 
