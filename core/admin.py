@@ -1,3 +1,14 @@
+"""
+Django admin customization.
+"""
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-# Register your models here.
+from core.models import User
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    """Define the admin pages fpr users."""
+    ordering = ['id']
+    list_display = ['email', 'name']
