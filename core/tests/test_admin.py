@@ -29,4 +29,4 @@ class AdminSiteTests(TestCase):
         res = self.client.get(url)
 
         self.assertContains(res, self.user.name)
-        self.assertEqual(res, self.user.email)
+        self.assertContains(res, self.user.email)
