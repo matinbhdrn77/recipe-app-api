@@ -10,7 +10,7 @@ from core.models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    """Define the admin pages fpr users."""
+    """Define the admin pages for users."""
     ordering = ['id']
     list_display = ['email', 'name']
     fieldsets = (
