@@ -9,7 +9,7 @@ from .serializers import UserSerializer, AuthTokenSerializer
 
 
 class CreateUserView(generics.CreateAPIView):
-    """"Create a new user in the system"""
+    """"Create a new user in the system."""
     serializer_class = UserSerializer
 
 
@@ -20,6 +20,7 @@ class CreateTokenView(ObtainAuthToken):
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
+    """Create and Update User."""
     serializer_class = UserSerializer
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
