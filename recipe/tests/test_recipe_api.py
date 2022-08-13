@@ -56,6 +56,7 @@ class PrivateRecipeApiTest(TestCase):
             'user@ex.com',
             'testpass123'
         )
+        self.client.force_authenticate(self.user)
 
     def test_retrive_recipes(self):
         """Test retriving a list of recipes."""
