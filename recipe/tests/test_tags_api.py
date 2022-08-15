@@ -10,20 +10,22 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Recipe, Tag
+from core.models import Tag
 
 from recipe.serializers import TagSerializer
 
 TAGS_URL = reverse("recipe:tag-list")
 
 
-def create_user(email="test@email.com", password="testpass123"):
-    """Create and return a new user."""
-    return get_user_model().objects.create_uesr(email, password)
+def create_user(email="tes@ex.com", password="testpass123"):
+    """Create and return a user."""
+    return get_user_model().objects.create_user(email, password)
+
 
 def create_tag(user, name):
     """Create and return a new tag."""
     return Tag.objects.create(user, name)
+
 
 class PublicTagsAPITests(TestCase):
     """Test public tag features."""
@@ -38,31 +40,33 @@ class PublicTagsAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateTagsAPITests(TestCase):
-    """Test private tag features."""
+
+
+class PrivateTagsApiTests(TestCase):
+    """Test authenticated API requests."""
 
     def setUp(self):
-        self.client = APIClient()
         self.user = create_user()
-        self.client.force_authenticate()
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
 
-    def test_retireve__tags(self):
-        """Test retirieving a list of tags."""
-        create_tag(self.user, 'tag1')
-        create_tag(self.user, 'tag2')
+    def test_retrieve_tags(self):
+        """Test retrieving a list of tags."""
+        Tag.objects.create(user=self.user, name='Vegan')
+        Tag.objects.create(user=self.user, name='Dessert')
 
         res = self.client.get(TAGS_URL)
 
         tags = Tag.objects.all().order_by('-name')
         serializer = TagSerializer(tags, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(serializer.data, res.data)
-    
+        self.assertEqual(res.data, serializer.data)
+
     def test_tags_limited_to_user(self):
-        """Test list of tags is limited to user"""
-        another_user = create_user(email='another@ex.com', password='testes123')
-        create_tag(another_user, 'tag3')
-        tag = create_tag(self.user, 'tag4')
+        """Test list of tags is limited to authenticated user."""
+        user2 = create_user(email='user2@example.com')
+        Tag.objects.create(user=user2, name='Fruity')
+        tag = Tag.objects.create(user=self.user, name='Comfort Food')
 
         res = self.client.get(TAGS_URL)
 
@@ -70,7 +74,3 @@ class PrivateTagsAPITests(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], tag.name)
         self.assertEqual(res.data[0]['id'], tag.id)
-
-
-    
-
