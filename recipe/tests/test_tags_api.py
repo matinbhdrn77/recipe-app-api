@@ -22,11 +22,6 @@ def create_user(email="tes@ex.com", password="testpass123"):
     return get_user_model().objects.create_user(email, password)
 
 
-def create_tag(user, name):
-    """Create and return a new tag."""
-    return Tag.objects.create(user, name)
-
-
 def detail_url(tag_id):
     """Return a detail url."""
     return reverse("recipe:tag-detail", args=[tag_id])
@@ -90,3 +85,13 @@ class PrivateTagsApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         tag.refresh_from_db()
         self.assertEqual(payload['name'], tag.name)
+
+    def test_delete_tag(self):
+        "Test delete a tag"
+        tag = Tag.objects.create(user=self.user, name='tag2')
+
+        url = detail_url(tag.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Tag.objects.filter(user=self.user).exists())
