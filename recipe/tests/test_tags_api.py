@@ -27,6 +27,11 @@ def create_tag(user, name):
     return Tag.objects.create(user, name)
 
 
+def detail_url(tag_id):
+    """Return a detail url."""
+    return reverse("recipe:tag-detail", args=[tag_id])
+
+
 class PublicTagsAPITests(TestCase):
     """Test public tag features."""
 
@@ -38,8 +43,6 @@ class PublicTagsAPITests(TestCase):
         res = self.client.get(TAGS_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
 
 
 class PrivateTagsApiTests(TestCase):
@@ -74,3 +77,16 @@ class PrivateTagsApiTests(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], tag.name)
         self.assertEqual(res.data[0]['id'], tag.id)
+
+    def test_update_tag(self):
+        """Test update a tag."""
+        tag = Tag.objects.create(user=self.user, name='tag1')
+        payload = {
+            'name': 'updated tag name'
+        }
+
+        res = self.client.patch(detail_url(tag.id), payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        tag.refresh_from_db()
+        self.assertEqual(payload['name'], tag.name)
