@@ -3,7 +3,16 @@ Serializers for recipe APIs
 """
 from rest_framework import serializers
 
-from core.models import Recipe, Tag
+from core.models import Recipe, Tag, Ingredient
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Serializer for ingredients."""
+
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name']
+        read_only_fields = ['id']
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -46,18 +55,18 @@ class RecipeDetailSerializer(RecipeSerializer):
         tags = validated_data.pop('tags', [])
         recipe = Recipe.objects.create(**validated_data)
         self._get_or_create_tags(tags, recipe)
-        
+
         return recipe
-    
+
     def update(self, instance, validated_data):
         """Update recipe."""
         tags = validated_data.pop('tags', None)
         if tags is not None:
             instance.tags.clear()
             self._get_or_create_tags(tags, instance)
-        
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        
+
         instance.save()
         return instance
