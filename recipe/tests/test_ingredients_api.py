@@ -1,7 +1,6 @@
 """
 Tests for ingredinets api.
 """
-import email
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
@@ -22,6 +21,11 @@ def create_user(email='test@ex.com', password='testpass123'):
     return get_user_model().objects.create_user(email, password)
 
 
+def detail_url(ingredient_id):
+    """Createa and return an ingredient detail URL."""
+    return reverse('recipe:ingredient-detail', args=[ingredient_id])
+
+
 class PublicIngreeintApiTests(TestCase):
     """Test unauthenticated API requests."""
 
@@ -33,7 +37,7 @@ class PublicIngreeintApiTests(TestCase):
         res = self.client.get(INGREDIENTS_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-    
+
 
 class PrivateIngredientsApiTests(TestCase):
     """Test unauthenticated API requests."""
@@ -59,12 +63,25 @@ class PrivateIngredientsApiTests(TestCase):
     def test_ingredient_limited_to_user(self):
         """Test list of ingredients is limited to authenticated user."""
         user2 = create_user(email='user2@ex.com')
-        Ingredient.objects.create(user= user2, name='ingredient3')
-        ingredient = Ingredient.objects.create(user=self.user, name='ingredient4')
+        Ingredient.objects.create(user=user2, name='ingredient3')
+        ingredient = Ingredient.objects.create(
+            user=self.user, name='ingredient4')
 
         res = self.client.get(INGREDIENTS_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], ingredient.name)
-        self.assertEqual(res.data[0]['id'], ingredient.id)  
+        self.assertEqual(res.data[0]['id'], ingredient.id)
+
+    def test_update_ingredient(self):
+        """Test updating an ingredient."""
+        ingredient = Ingredient.objects.create(user=self.user, name='ingredient5')
+        
+        payload = {'name': 'ingredient6'}
+        url = detail_url(ingredient.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        ingredient.refresh_from_db()
+        self.assertEqual(ingredient.name, payload['name'])
