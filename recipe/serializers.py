@@ -1,9 +1,7 @@
 """
 Serializers for recipe APIs
 """
-from asyncio import FastChildWatcher
-from importlib.metadata import requires
-from tkinter.messagebox import NO
+from dataclasses import field
 from rest_framework import serializers
 
 from core.models import Recipe, Tag, Ingredient
@@ -90,3 +88,13 @@ class RecipeDetailSerializer(RecipeSerializer):
 
         instance.save()
         return instance
+
+
+class RecipeImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to recipes."""
+
+    class Meta:
+        model = Recipe
+        fields = ['id', 'image']
+        read_only_fields = ['id']
+        extra_kwargs = {'image': {'required': 'True'}}
