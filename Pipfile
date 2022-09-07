@@ -8,6 +8,7 @@ django = "<3.3"
 djangorestframework = "<3.13"
 psycopg2 = "==2.8.6"
 drf-spectacular = "<0.16"
+pillow = "==8.3.2"
 
 [dev-packages]
 autopep8 = "*"
