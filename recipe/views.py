@@ -12,6 +12,7 @@ from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiPara
 from core.models import Ingredient, Recipe, Tag
 from recipe import serializers
 
+
 @extend_schema_view(
     list=extend_schema(
         parameters=[
